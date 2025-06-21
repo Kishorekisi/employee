@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .login-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-form h1 {
+            margin-bottom: 2rem;
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .main-app {
+            display: none;
+        }
+
+        .main-app.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .employee-table th,
+        .employee-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .employee-table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+        }
+
+        .employee-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .employee-table {
+                font-size: 0.9rem;
+            }
+
+            .employee-table th,
+            .employee-table td {
+                padding: 0.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen" class="login-container">
+        <div class="login-form">
+            <h1>🏢 Employee Manager</h1>
+            <div id="loginAlert"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Enter username">
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 2rem;">
+                    🔐 Sign In
+                </button>
+            </form>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem;">
+                <strong>Demo Credentials:</strong><br>
+                Admin: <code>admin</code> / <code>admin123</code><br>
+                HR Manager: <code>hr</code> / <code>hr123</code>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="main-app">
+        <div class="container">
+
+            <div class="header">
+                <h1>👥 Employee Management System</h1>
+                <div class="user-info">
+                    <span id="currentUser" class="user-badge"></span>
+                    <button onclick="logout()" class="btn btn-secondary btn-sm">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span id="totalEmployees" class="stat-number">0</span>
+                    <span class="stat-label">Total Employees</span>
+                </div>
+                <div class="stat-card">
+                    <span id="activeEmployees" class="stat-number">0</span>
+                    <span class="stat-label">Active Employees</span>
+                </div>
+                <div class="stat-card">
+                    <span id="totalDepartments" class="stat-number">0</span>
+                    <span class="stat-label">Departments</span>
+                </div>
+                <div class="stat-card">
+                    <span id="avgSalary" class="stat-number">$0</span>
+                    <span class="stat-label">Average Salary</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search employees by name, email, or department...">
+                </div>
+                <button onclick="openModal('add')" class="btn btn-success">
+                    ➕ Add Employee
+                </button>
+                <select id="departmentFilter" onchange="applyFilters()">
+                    <option value="">All Departments</option>
+                </select>
+                <select id="statusFilter" onchange="applyFilters()">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <div id="alertContainer"></div>
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Loading employees...</p>
+                </div>
+                <table class="employee-table" id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Position</th>
+                            <th>Salary</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeTableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Employee</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="employeeForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department *</label>
+                        <select id="department" required>
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position *</label>
+                        <input type="text" id="position" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary *</label>
+                        <input type="number" id="salary" required min="0" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="hireDate">Hire Date *</label>
+                        <input type="date" id="hireDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="address">Address</label>
+                        <textarea id="address" placeholder="Enter full address"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" placeholder="Additional notes or comments"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="submitBtn" class="btn btn-success">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        const users = [
+            { username: 'admin', password: 'admin123', role: 'Administrator', name: 'System Admin' },
+            { username: 'hr', password: 'hr123', role: 'HR Manager', name: 'HR Manager' }
+        ];
+
+        let currentUser = null;
+        let employees = [];
+        let currentEditId = null;
+
+        const sampleEmployees = [
+            {
+                id: 1,
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@company.com',
+                phone: '+1-555-0123',
+                department: 'Engineering',
+                position: 'Senior Software Engineer',
+                salary: 95000,
+                hireDate: '2020-03-15',
+                status: 'Active',
+                address: '123 Main St, City, State 12345',
+                notes: 'Excellent team player with strong technical skills.'
+            },
+            {
+                id: 2,
+                firstName: 'Jane',
+                lastName: 'Smith',
+                email: 'jane.smith@company.com',
+                phone: '+1-555-0124',
+                department: 'Marketing',
+                position: 'Marketing Manager',
+                salary: 85000,
+                hireDate: '2019-07-22',
+                status: 'Active',
+                address: '456 Oak Ave, City, State 12345',
+                notes: 'Creative leader with excellent communication skills.'
+            },
+            {
+                id: 3,
+                firstName: 'Mike',
+                lastName: 'Johnson',
+                email: 'mike.johnson@company.com',
+                phone: '+1-555-0125',
+                department: 'Sales',
+                position: 'Sales Representative',
+                salary: 65000,
+                hireDate: '2021-11-08',
+                status: 'Pending',
+                address: '789 Pine Rd, City, State 12345',
+                notes: 'New hire currently in training period.'
+            },
+            {
+                id: 4,
+                firstName: 'Sarah',
+                lastName: 'Wilson',
+                email: 'sarah.wilson@company.com',
+                phone: '+1-555-0126',
+                department: 'Human Resources',
+                position: 'HR Specialist',
+                salary: 70000,
+                hireDate: '2018-05-14',
+                status: 'Active',
+                address: '321 Elm St, City, State 12345',
+                notes: 'Handles recruitment and employee relations.'
+            },
+            {
+                id: 5,
+                firstName: 'David',
+                lastName: 'Brown',
+                email: 'david.brown@company.com',
+                phone: '+1-555-0127',
+                department: 'Finance',
+                position: 'Financial Analyst',
+                salary: 75000,
+                hireDate: '2020-09-30',
+                status: 'Inactive',
+                address: '654 Maple Dr, City, State 12345',
+                notes: 'Currently on extended leave.'
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            employees = [...sampleEmployees];
+
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('employeeForm').addEventListener('submit', handleEmployeeSubmit);
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+            populateDepartmentFilter();
+            updateStatistics();
+            renderEmployeeTable();
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').classList.add('active');
+                document.getElementById('currentUser').textContent = `${user.name} (${user.role})`;
+                showAlert('Welcome back, ' + user.name + '!', 'success');
+            } else {
+                showAlert('Invalid username or password. Please try again.', 'error', 'loginAlert');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginAlert').innerHTML = '';
+        }
+
+
+        function openModal(mode, employeeId = null) {
+            currentEditId = employeeId;
+            const modal = document.getElementById('employeeModal');
+            const title = document.getElementById('modalTitle');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (mode === 'add') {
+                title.textContent = 'Add New Employee';
+                submitBtn.textContent = 'Add Employee';
+                submitBtn.className = 'btn btn-success';
+                document.getElementById('employeeForm').reset();
+                
+                document.getElementById('hireDate').value = new Date().toISOString().split('T')[0];
+            } else if (mode === 'edit') {
+                title.textContent = 'Edit Employee';
+                submitBtn.textContent = 'Update Employee';
+                submitBtn.className = 'btn btn-warning';
+                
+                const employee = employees.find(emp => emp.id === employeeId);
+                if (employee) {
+                    populateForm(employee);
+                }
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('employeeModal').classList.remove('active');
+            document.getElementById('employeeForm').reset();
+            currentEditId = null;
+        }
+
+        function populateForm(employee) {
+            document.getElementById('firstName').value = employee.firstName;
+            document.getElementById('lastName').value = employee.lastName;
+            document.getElementById('email').value = employee.email;
+            document.getElementById('phone').value = employee.phone || '';
+            document.getElementById('department').value = employee.department;
+            document.getElementById('position').value = employee.position;
+            document.getElementById('salary').value = employee.salary;
+            document.getElementById('hireDate').value = employee.hireDate;
+            document.getElementById('status').value = employee.status;
+            document.getElementById('address').value = employee.address || '';
+            document.getElementById('notes').value = employee.notes || '';
+        }
+
+        function handleEmployeeSubmit(e) {
+            e.preventDefault();
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                department: document.getElementById('department').value,
+                position: document.getElementById('position').value.trim(),
+                salary: parseInt(document.getElementById('salary').value),
+                hireDate: document.getElementById('hireDate').value,
+                status: document.getElementById('status').value,
+                address: document.getElementById('address').value.trim(),
+                notes: document.getElementById('notes').value.trim()
+            };
+
+            if (!validateEmployeeData(formData)) {
+                return;
+            }
+
+            if (currentEditId) {
+                
+                const index = employees.findIndex(emp => emp.id === currentEditId);
+                if (index !== -1) {
+                    employees[index] = { ...employees[index], ...formData };
+                    showAlert('Employee updated successfully!', 'success');
+                }
+            } else {
+                const newEmployee = {
+                    id: Math.max(...employees.map(emp => emp.id), 0) + 1,
+                    ...formData
+                };
+                employees.push(newEmployee);
+                showAlert('Employee added successfully!', 'success');
+            }
+
+            closeModal();
+            renderEmployeeTable();
+            updateStatistics();
+            populateDepartmentFilter();
+        }
+
+        function validateEmployeeData(data) {
+
+            const requiredFields = ['firstName', 'lastName', 'email', 'department', 'position', 'salary', 'hireDate', 'status'];
+            for (let field of requiredFields
